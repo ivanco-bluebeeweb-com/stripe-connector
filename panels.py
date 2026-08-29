@@ -212,7 +212,7 @@ async def _revenue_dashboard(ctx) -> ui.UINode:
 
     if not customers_result.success:
         body.append(ui.Error(message=customers_result.error or "Could not load customers.",
-                              on_retry=ui.Call("__panel__stripe_center")))
+                              retry=ui.Call("__panel__stripe_center")))
         return ui.Stack(direction="v", gap=4, children=body)
 
     customers = customers_result.data.items if customers_result.data else []
@@ -239,7 +239,7 @@ async def _customer_detail(ctx, customer_id: str) -> ui.UINode:
             ui.Button("← Back to dashboard", variant="ghost", size="sm",
                       on_click=ui.Call("__panel__stripe_center")),
             ui.Error(message=result.error or "Customer not found.",
-                     on_retry=ui.Call("__panel__stripe_center", customer_id=customer_id)),
+                     retry=ui.Call("__panel__stripe_center", customer_id=customer_id)),
         ])
     c = result.data
     charges_result = await h.list_charges(ctx, h.ListChargesParams(limit=20, extra_params={}))
