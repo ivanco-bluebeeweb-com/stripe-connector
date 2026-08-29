@@ -126,6 +126,9 @@ async def stripe_connect_panel(ctx, **kwargs) -> object:
         ui.Text(f"Balance -- {first.get('label') or first.get('id', '')}", variant="subtitle"),
         ui.Text(balance_line or "Unable to load balance.", variant="caption"),
         ui.Divider(),
+        ui.Button("View revenue", variant="primary", size="sm", full_width=True,
+                  icon="TrendingUp", on_click=ui.Call("__panel__stripe_center")),
+        ui.Divider(),
         _settings_button(),
     ])
 
@@ -162,16 +165,104 @@ async def stripe_connect_help(ctx, **kwargs) -> object:
     )
 
 
+def _customer_row(c) -> dict:
+    return {
+        "name": c.name or c.email or c.id, "email": c.email or "—",
+        "customer_id": c.id,
+    }
+
+
 @ext.panel("stripe_center", slot="center", title="Stripe", icon="💳", center_overlay=True)
-async def stripe_center_panel(ctx, **kwargs) -> object:
-    """Base center panel -- per UI_INTERFACE_STANDARD.md (2026-08-20).
-    This app has no list/detail content of its own to show in the center
-    by default (everything lives in the sidebar). MUST carry
-    center_overlay=True: per docs.imperal.io/en/concepts/panels, a plain
-    slot="center" panel is registered but the Panel app never fetches it
-    at session-init without that flag. Text is the shared canonical
-    wording -- must stay identical across every app in this situation."""
-    return ui.Empty(
-        message="Nothing to show here -- this app is managed entirely from the sidebar.",
-        icon="👈",
-    )
+async def stripe_center_panel(ctx, customer_id: str = "", **kwargs) -> object:
+    """Post-connect main screen: revenue dashboard, or a customer detail
+    when `customer_id` is passed (master-detail via the same panel_id, per
+    UI_COMPONENT_VOCABULARY.md §3)."""
+    connections = await h._get_connections(ctx)
+    if not connections:
+        return ui.Empty(
+            message="Connect a Stripe account from the sidebar to see revenue here.",
+            icon="💳",
+        )
+    if customer_id:
+        return await _customer_detail(ctx, customer_id)
+    return await _revenue_dashboard(ctx)
+
+
+async def _revenue_dashboard(ctx) -> ui.UINode:
+    report_result = await h.get_revenue_report(ctx, h.RevenueReportParams(days=30))
+    stats: list[ui.UINode] = []
+    if report_result.success and report_result.data:
+        r = report_result.data
+        cur = (r.currency or "").upper()
+        stats = [
+            ui.Stat(label="Gross volume (30d)", value=f"{r.gross_volume / 100:.2f} {cur}"),
+            ui.Stat(label="Net volume (30d)", value=f"{r.net_volume / 100:.2f} {cur}"),
+            ui.Stat(label="Active subscriptions", value=str(r.active_subscriptions)),
+            ui.Stat(label="MRR estimate", value=f"{r.mrr_estimate / 100:.2f} {cur}"),
+            ui.Stat(label="Disputes (30d)", value=str(r.disputes_count)),
+            ui.Stat(label="Past-due invoices", value=str(r.past_due_invoices)),
+        ]
+
+    customers_result = await h.list_customers(ctx, h.ListCustomersParams(limit=50))
+    body: list[ui.UINode] = []
+    if stats:
+        body.append(ui.Stats(children=stats))
+    body.append(ui.Divider())
+    body.append(ui.Text("Recent customers", variant="heading"))
+
+    if not customers_result.success:
+        body.append(ui.Error(message=customers_result.error or "Could not load customers.",
+                              on_retry=ui.Call("__panel__stripe_center")))
+        return ui.Stack(direction="v", gap=4, children=body)
+
+    customers = customers_result.data.items if customers_result.data else []
+    if not customers:
+        body.append(ui.Empty(message="No customers yet.", icon="👤"))
+        return ui.Stack(direction="v", gap=4, children=body)
+
+    columns = [
+        ui.DataColumn("name", "Customer", sortable=True),
+        ui.DataColumn("email", "Email", sortable=True),
+    ]
+    body.append(ui.DataTable(
+        columns=columns,
+        rows=[_customer_row(c) for c in customers],
+        on_row_click=ui.Call("__panel__stripe_center", customer_id=""),
+    ))
+    return ui.Stack(direction="v", gap=4, children=body)
+
+
+async def _customer_detail(ctx, customer_id: str) -> ui.UINode:
+    result = await h.get_customer(ctx, h.GetCustomerParams(customer_id=customer_id))
+    if not result.success or not result.data:
+        return ui.Stack(direction="v", gap=4, children=[
+            ui.Button("← Back to dashboard", variant="ghost", size="sm",
+                      on_click=ui.Call("__panel__stripe_center")),
+            ui.Error(message=result.error or "Customer not found.",
+                     on_retry=ui.Call("__panel__stripe_center", customer_id=customer_id)),
+        ])
+    c = result.data
+    charges_result = await h.list_charges(ctx, h.ListChargesParams(limit=20, extra_params={}))
+    charges = charges_result.data.items if charges_result.success and charges_result.data else []
+    columns = [
+        ui.DataColumn("title", "Charge", sortable=False),
+        ui.DataColumn("amount", "Amount", sortable=False),
+        ui.DataColumn("status", "Status", sortable=False),
+    ]
+    rows = [
+        {"title": ch.title or ch.id, "amount": f"{ch.amount / 100:.2f} {(ch.currency or '').upper()}",
+         "status": ch.status or ("paid" if ch.paid else "failed")}
+        for ch in charges if ch.customer_id == customer_id
+    ]
+    return ui.Stack(direction="v", gap=4, children=[
+        ui.Button("← Back to dashboard", variant="ghost", size="sm",
+                  on_click=ui.Call("__panel__stripe_center")),
+        ui.Header(text=c.name or c.email or c.id, level=2, subtitle=c.email or ""),
+        ui.KeyValue(items=[
+            {"key": "Email", "value": c.email or "—"},
+            {"key": "Customer ID", "value": c.id},
+        ]),
+        ui.Text("Recent charges", variant="heading"),
+        ui.DataTable(columns=columns, rows=rows) if rows
+        else ui.Text("No charges found for this customer.", variant="caption"),
+    ])
