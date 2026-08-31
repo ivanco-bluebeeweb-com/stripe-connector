@@ -53,6 +53,8 @@ class ProviderConnection(sdl.Entity):
 
 
 class ProviderConnectionList(sdl.EntityList[ProviderConnection]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -94,6 +96,8 @@ class StripeObject(sdl.Entity):
 
 
 class StripeObjectList(sdl.EntityList[StripeObject]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -145,6 +149,8 @@ class StripeCustomer(sdl.Entity):
 
 
 class StripeCustomerList(sdl.EntityList[StripeCustomer]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -224,6 +230,8 @@ class StripePaymentIntent(sdl.Entity):
 
 
 class StripePaymentIntentList(sdl.EntityList[StripePaymentIntent]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -249,6 +257,8 @@ class StripeCharge(sdl.Entity):
 
 
 class StripeChargeList(sdl.EntityList[StripeCharge]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -314,6 +324,8 @@ class StripeProduct(sdl.Entity):
 
 
 class StripeProductList(sdl.EntityList[StripeProduct]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -352,6 +364,8 @@ class StripePrice(sdl.Entity):
 
 
 class StripePriceList(sdl.EntityList[StripePrice]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -400,6 +414,8 @@ class StripeSubscription(sdl.Entity):
 
 
 class StripeSubscriptionList(sdl.EntityList[StripeSubscription]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -452,6 +468,8 @@ class StripeInvoice(sdl.Entity):
 
 
 class StripeInvoiceList(sdl.EntityList[StripeInvoice]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -499,6 +517,8 @@ class StripeCheckoutSession(sdl.Entity):
 
 
 class StripeCheckoutSessionList(sdl.EntityList[StripeCheckoutSession]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -525,6 +545,8 @@ class StripePaymentLink(sdl.Entity):
 
 
 class StripePaymentLinkList(sdl.EntityList[StripePaymentLink]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -561,6 +583,8 @@ class StripeCoupon(sdl.Entity):
 
 
 class StripeCouponList(sdl.EntityList[StripeCoupon]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -590,6 +614,8 @@ class StripePromotionCode(sdl.Entity):
 
 
 class StripePromotionCodeList(sdl.EntityList[StripePromotionCode]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -624,6 +650,8 @@ class StripeDispute(sdl.Entity):
 
 
 class StripeDisputeList(sdl.EntityList[StripeDispute]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -660,6 +688,8 @@ class StripePayout(sdl.Entity):
 
 
 class StripePayoutList(sdl.EntityList[StripePayout]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -688,6 +718,8 @@ class StripeTransfer(sdl.Entity):
 
 
 class StripeTransferList(sdl.EntityList[StripeTransfer]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -707,6 +739,8 @@ class StripeBalanceTransaction(sdl.Entity):
 
 
 class StripeBalanceTransactionList(sdl.EntityList[StripeBalanceTransaction]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -752,6 +786,8 @@ class StripeConnectedAccount(sdl.Entity):
 
 
 class StripeConnectedAccountList(sdl.EntityList[StripeConnectedAccount]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -786,6 +822,8 @@ class StripeSetupIntent(sdl.Entity):
 
 
 class StripeSetupIntentList(sdl.EntityList[StripeSetupIntent]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -809,6 +847,8 @@ class StripeTaxRate(sdl.Entity):
 
 
 class StripeTaxRateList(sdl.EntityList[StripeTaxRate]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -849,6 +889,8 @@ class StripeWebhookEndpoint(sdl.Entity):
 
 
 class StripeWebhookEndpointList(sdl.EntityList[StripeWebhookEndpoint]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -878,6 +920,8 @@ class StripeEvent(sdl.Entity):
 
 
 class StripeEventList(sdl.EntityList[StripeEvent]):
+    id: str = ""
+    title: str = ""
     pass
 
 
@@ -927,4 +971,6 @@ class DunningInvoiceRow(BaseModel):
 
 
 class DunningReport(sdl.EntityList[StripeObject]):
+    id: str = ""
+    title: str = ""
     pass
