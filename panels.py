@@ -34,8 +34,7 @@ def _settings_button() -> ui.UINode:
     """The one required secondary entry point into the settings screen --
     always the last element at the bottom of the sidebar."""
     return ui.Button(
-        "App settings", variant="secondary", size="sm", full_width=True,
-        icon="settings", on_click=ui.Call("__panel__stripe_settings"),
+        "App settings", variant="secondary", size="sm", icon="settings", on_click=ui.Call("__panel__stripe_settings"),
     )
 
 
@@ -126,8 +125,7 @@ async def stripe_connect_panel(ctx, **kwargs) -> object:
         ui.Text(f"Balance -- {first.get('label') or first.get('id', '')}", variant="subtitle"),
         ui.Text(balance_line or "Unable to load balance.", variant="caption"),
         ui.Divider(),
-        ui.Button("View revenue", variant="primary", size="sm", full_width=True,
-                  icon="TrendingUp", on_click=ui.Call("__panel__stripe_center")),
+        ui.Button("View revenue", variant="primary", size="sm", icon="TrendingUp", on_click=ui.Call("__panel__stripe_center")),
         ui.Divider(),
         _settings_button(),
     ])
